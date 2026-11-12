@@ -89,6 +89,15 @@ h3{font-size:11px;letter-spacing:.14em;color:var(--dim);margin:16px 0 8px;font-w
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .cgrid .btn{flex-direction:column;align-items:flex-start;gap:4px;margin:0}
 .cgrid .btn:hover{border-color:rgba(255,77,94,.5)}
+.sld{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);margin-bottom:6px}
+.sld .t{display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.sld .t b{color:var(--acc);font-variant-numeric:tabular-nums}
+.sld .d{color:var(--dim);font-size:11.5px;margin-top:4px}
+.sld input{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin-top:4px;touch-action:pan-y}
+.sld input::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--acc) var(--p),#28324a var(--p))}
+.sld input::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--acc) var(--p),#28324a var(--p))}
+.sld input::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;margin-top:-8px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.sld input::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff}
 .alert{display:flex;gap:10px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);margin-bottom:6px;cursor:pointer;background:rgba(255,255,255,.02)}
 .alert:hover{background:rgba(255,255,255,.05)}
 .alert .i{font-size:18px}
@@ -441,7 +450,6 @@ const DATA={};for(const l of DATA_TXT.split('\n')){const p=l.split('|');DATA[p[0
 const XC={};for(const l of CITY_TXT.split('\n')){const[k,...r]=l.split('|');const rest=l.slice(k.length+1).split(';').map(s=>{const q=s.split('|');return{name:q[0],lat:+q[1],lon:+q[2]}});XC[k]=rest;}
 
 const POL=[
- {id:'lockdown',ic:'🏠',n:'Confinement',d:'Contagion −70 %. L’économie et le moral plongent.'},
  {id:'masks',ic:'😷',n:'Masques & hygiène',d:'Contagion −25 %. Presque gratuit.'},
  {id:'borders',ic:'🛂',n:'Fermer les frontières',d:'Bloque virus, réfugiés et panique financière. Freine le commerce.'},
  {id:'research',ic:'🔬',n:'Recherche médicale',d:'Accélère la découverte d’un vaccin.'},
@@ -449,20 +457,16 @@ const POL=[
  {id:'ration',ic:'🥖',n:'Rationnement',d:'Divise par deux les morts de faim. Impopulaire.'},
  {id:'agri',ic:'🌾',n:'Plan agricole d’urgence',d:'Relance la production alimentaire (+20 %).'},
  {id:'aid',ic:'🤝',n:'Aides sociales',d:'Apaise la colère, nourrit les plus pauvres. Inflation.'},
- {id:'watercut',ic:'🚱',n:'Couper l’eau',d:'Économise l’eau… au prix de la soif, des épidémies et de la colère.'},
- {id:'powercut',ic:'🔌',n:'Couper l’électricité',d:'Hôpitaux, usines et nuits plongés dans le noir.'},
  {id:'internet',ic:'📵',n:'Couper Internet',d:'Étouffe la contestation, paralyse l’économie.'},
  {id:'curfew',ic:'🌙',n:'Couvre-feu',d:'Vide les rues par la force. Popularité en baisse.'},
  {id:'print',ic:'🖨️',n:'Planche à billets',d:'Soutient l’économie à court terme. Inflation garantie.'},
  {id:'austerity',ic:'✂️',n:'Austérité',d:'Calme l’inflation et les marchés. Colère sociale.'},
  {id:'banks',ic:'🏦',n:'Sauver les banques',d:'Stoppe la panique financière. Impopulaire.'},
- {id:'army',ic:'🎖️',n:'Militariser',d:'Armée renforcée, voisins inquiets : la tension monte.'},
  {id:'diplomacy',ic:'🕊️',n:'Offensive diplomatique',d:'Fait baisser les tensions et peut arrêter une guerre.'},
  {id:'green',ic:'🌱',n:'Transition verte',d:'Émissions −60 %. Coûteux au début.'},
  {id:'space',ic:'🚀',n:'Programme spatial',d:'Rapproche l’humanité de Mars… et au-delà.'},
 ];
 const CRISES=[
- {id:'pandemic',ic:'🦠',n:'Pandémie',d:'Un nouveau virus apparaît.'},
  {id:'krach',ic:'📉',n:'Krach financier',d:'Les marchés s’effondrent, la panique se propage.'},
  {id:'drought',ic:'🏜️',n:'Sécheresse',d:'Les réserves d’eau s’effondrent pour des mois.'},
  {id:'famine',ic:'🌾',n:'Famine',d:'Les récoltes sont détruites.'},
@@ -479,7 +483,7 @@ const START=Date.UTC(2027,0,1);
 /* ====================== ÉTAT ====================== */
 let topo,feats,A=[],PAIRS=[],mesh,G,feed=[],unread=0;
 let sel=-1,tab='info',layer='etat',speed=2,scopeWorld=false,view='globe',curCity=null;
-function newG(){return{day:0,temp:1.3,space:0,ms:0,mars:0,research:0,vaccine:0,pan:null,dead:{pandemie:0,faim:0,soif:0,guerre:0,catastrophe:0},pop:0,gdp:1,I:0,fin:0,cd:{},random:true,lastWeek:0,colonies:[]};}
+function newG(){return{day:0,temp:1.3,space:0,ms:0,mars:0,research:0,vaccine:0,pan:null,dead:{pandemie:0,faim:0,soif:0,guerre:0,catastrophe:0},pop:0,gdp:1,I:0,fin:0,cd:{},random:true,pans:[],lastWeek:0,colonies:[]};}
 function initCountries(fresh){
   A=feats.map((f,i)=>{
     const nm=f.properties.name,d=DATA[nm];
@@ -504,7 +508,7 @@ function initCountries(fresh){
 }
 function resetDyn(c){Object.assign(c,{pop:c.pop0,S:1,I:0,R:0,dead:{pandemie:0,faim:0,soif:0,guerre:0,catastrophe:0},wk:{pandemie:0,faim:0,soif:0,guerre:0,catastrophe:0},
   rd:0,gdp:1,unemp:.05+Math.random()*.04,infl:.02+Math.random()*.02,market:100,mkW:100,fin:0,food:c.gdpc<1.5?.82:1,water:1,power:1,unrest:.12+Math.random()*.08,approval:.5,mil:.2,
-  pol:{},drought:0,cyber:0,famine:0,wars:[],hist:[],refug:0,hadCase:false});}
+  pol:{},sl:SLDEF(),dz:{},drought:0,cyber:0,famine:0,wars:[],hist:[],refug:0,hadCase:false});}
 const live=()=>A.filter(c=>c.pop0>0);
 
 /* ====================== ALERTES ====================== */
@@ -530,71 +534,103 @@ function updBadge(){const b=$('#badge');b.style.display=unread?'inline-block':'n
 function kill(c,n,cause){if(!(n>0))return;n=Math.min(n,c.pop*.5);c.pop-=n;c.dead[cause]+=n;c.wk[cause]+=n;c.rd+=n;G.dead[cause]+=n;}
 const ccity=c=>pick(c.cities);
 const cpop=(c,ct)=>Math.min(c.pop*ct.share,(ct.cap?2.2e7:1.4e7));
-function hcap(c){return .002+Math.min(.015,c.gdpc*.00025);}
+function hcap(c){return (.002+Math.min(.015,c.gdpc*.00025))*(c.sl.health/8)*(1+(c.sl.tax-35)/100);}
+const DISEASES=[
+ {id:'covid',ic:'🦠',n:'Covid-19',R0:2.9,ifr:.004,dur:10,d:'Virus respiratoire très contagieux'},
+ {id:'flu1918',ic:'🤧',n:'Grippe espagnole',R0:2.1,ifr:.025,dur:7,d:'La grippe de 1918 revient'},
+ {id:'measles',ic:'🔴',n:'Rougeole',R0:14,ifr:.002,dur:9,vacK:1,imm:1,d:'Ultra-contagieuse, vaccin connu'},
+ {id:'tb',ic:'🫁',n:'Tuberculose',R0:1.8,ifr:.12,dur:120,poorK:1,richK:.25,vacK:.6,d:'Lente, frappe surtout les pays pauvres'},
+ {id:'ebola',ic:'🩸',n:'Ebola',R0:1.9,ifr:.45,dur:12,richK:.35,d:'Rare mais extrêmement mortelle'},
+ {id:'plague',ic:'🐀',n:'Peste',R0:2.6,ifr:.3,dur:8,richK:.25,poorK:1,d:'La Peste noire, version moderne'},
+ {id:'cholera',ic:'💩',n:'Choléra',R0:1.3,ifr:.02,dur:7,waterK:1,richK:.2,d:'Explose quand l’eau potable manque'},
+ {id:'smallpox',ic:'☠️',n:'Variole',R0:5,ifr:.3,dur:14,vacK:.5,d:'Éradiquée… jusqu’à aujourd’hui'},
+ {id:'h5n1',ic:'🐦',n:'Grippe aviaire H5N1',R0:1.8,ifr:.1,dur:7,d:'Saute de l’oiseau à l’humain'},
+ {id:'x',ic:'🧬',n:'Virus X',rand:1,d:'Inventé : paramètres inconnus'}];
+const SLIDERS=[
+ {id:'lock',ic:'🏠',n:'Confinement',min:0,max:100,def:0,u:' %',d:v=>v?`Contagion −${Math.round(v*.7)} %, commerces fermés, moral en baisse`:'Aucune restriction'},
+ {id:'water',ic:'💧',n:'Eau distribuée',min:0,max:100,def:100,u:' %',d:v=>v>=100?'Robinets ouverts':v<20?'Eau coupée : soif, choléra, colère':'Coupures tournantes'},
+ {id:'power',ic:'⚡',n:'Électricité distribuée',min:0,max:100,def:100,u:' %',d:v=>v>=100?'Réseau normal':v<20?'Black-out : hôpitaux et usines à l’arrêt':'Délestages'},
+ {id:'tax',ic:'🧾',n:'Impôts',min:10,max:80,def:35,u:' %',d:v=>v>45?'Hôpitaux et aides renforcés, croissance freinée, grogne':v<25?'Croissance dopée, services publics affaiblis':'Niveau habituel'},
+ {id:'money',ic:'💱',n:'Valeur de la monnaie',min:-50,max:50,def:0,u:' %',sg:1,d:v=>v<-5?'Dévaluation : exportations ↑, inflation ↑':v>5?'Monnaie forte : inflation ↓, exportations ↓':'Cours normal'},
+ {id:'rate',ic:'🏛️',n:'Taux d’intérêt',min:0,max:20,def:3,u:' %',d:v=>v>6?'Inflation ↓ mais crédit cher : chômage ↑':v<2?'Argent gratuit : croissance et inflation ↑':'Niveau habituel'},
+ {id:'food',ic:'🥖',n:'Prix de la nourriture',min:-50,max:100,def:0,u:' %',sg:1,d:v=>v<-5?'Prix bas : populaire, mais pénuries':v>5?'Prix hauts : production ↑, les pauvres ont faim':'Prix du marché'},
+ {id:'wprice',ic:'🚰',n:'Prix de l’eau',min:-50,max:100,def:0,u:' %',sg:1,d:v=>v<-5?'Eau bradée : gaspillage':v>5?'Eau chère : économies d’eau, soif chez les pauvres':'Prix normal'},
+ {id:'energy',ic:'⛽',n:'Prix de l’énergie',min:-50,max:100,def:0,u:' %',sg:1,d:v=>v<-5?'Énergie bon marché : croissance ↑, pollution ↑':v>5?'Énergie chère : pollution ↓, économie et colère ↓↑':'Prix du marché'},
+ {id:'wage',ic:'💶',n:'Salaire minimum',min:0,max:200,def:100,u:' %',d:v=>v>120?'Pouvoir d’achat ↑, chômage ↑':v<80?'Embauches ↑, colère ↑':'Niveau habituel'},
+ {id:'health',ic:'🏥',n:'Budget santé',min:2,max:20,def:8,u:' % PIB',d:v=>v>10?'Plus de lits, moins de morts, recherche plus rapide':v<6?'Hôpitaux vite saturés':'Niveau habituel'},
+ {id:'army',ic:'🎖️',n:'Budget militaire',min:0,max:10,def:2,u:' % PIB',d:v=>v>4?'Armée puissante, voisins inquiets':v<1?'Pays désarmé, tensions en baisse':'Niveau habituel'},
+];
+const SLDEF=()=>{const o={};for(const x of SLIDERS)o[x.id]=x.def;return o;};
+const dz=(c,id)=>c.dz[id]||(c.dz[id]={S:1,I:0,R:0,had:false});
 function stepCountry(c,dt){
-  const P=c.pol,war=c.wars.length>0;
+  const P=c.pol,war=c.wars.length>0,V=c.sl,L=V.lock/100,WS=V.water/100,PS=V.power/100;
+  const tx=(V.tax-35)/100,dev=-V.money/100,rt=(V.rate-3)/100,fp=V.food/100,wp=V.wprice/100,ep=V.energy/100,wg=(V.wage-100)/100,hb=V.health/8,ab=(V.army-2)/8;
   // eau / électricité
-  let wt=1-(c.drought>0?.62:0)-Math.max(0,G.temp-2)*.07;if(P.watercut)wt=.05;wt=Math.max(.03,wt);
-  c.water+=(wt-c.water)*Math.min(1,(P.watercut?.7:.05)*dt);
-  let pt=1;if(P.powercut)pt=.06;if(c.cyber>0)pt=Math.min(pt,.25);if(war)pt=Math.min(pt,.78);
+  let wt=1-(c.drought>0?.62:0)-Math.max(0,G.temp-2)*.07;if(c.drought>0)wt+=Math.max(0,wp)*.15;wt=Math.min(wt,.04+WS*.96);wt=Math.max(.03,wt);
+  c.water+=(wt-c.water)*Math.min(1,(WS<1?.7:.05)*dt);
+  let pt=Math.min(1,.03+PS);if(c.cyber>0)pt=Math.min(pt,.25);if(war)pt=Math.min(pt,.78);
   c.power+=(pt-c.power)*Math.min(1,.35*dt);
   // nourriture
   let prod=(.3+.7*c.water)*(.75+.25*c.power)*(war?.72:1)*(1-Math.max(0,G.temp-1.5)*.09)*(P.agri?1.2:1)*(c.famine>0?.3:1)*Math.pow(clamp(c.gdp,.2,2),.25)*(c.gdpc<1.5?.93:1);
-  if(P.borders)prod*=c.gdpc>20?.95:.9;prod=Math.min(1.12,prod);
+  if(P.borders)prod*=c.gdpc>20?.95:.9;prod*=1+fp*(fp<0?.35:.08)+dev*(dev<0?.1:0);prod=Math.min(1.12,prod);
   let fr=.02;if(P.ration&&prod<c.food)fr*=.45;c.food+=(prod-c.food)*Math.min(1,fr*dt);
-  // pandémie
-  const pan=G.pan;
-  if(pan){
-    const beta=pan.R0/pan.dur*(P.lockdown?.3:1)*(P.masks?.75:1)*(P.curfew?.85:1)*(c.water<.4?1.35:1)*(c.unrest>.6?1.15:1);
-    let nbI=0;for(const j of c.nb)nbI+=A[j].I;nbI/=Math.max(1,c.nb.length);
-    let imp=(nbI*.012+G.I*.004*(c.gdpc>10?2:1))*(P.borders?.04:1);
-    let ni=Math.min(c.S,beta*c.S*(c.I+imp)*dt);c.S-=ni;c.I+=ni;
-    const rec=Math.min(c.I,c.I/pan.dur*dt),hc=hcap(c),over=c.I>hc?Math.min(1.8,1+(c.I/hc-1)*.15):1;
-    const ifr=Math.min(.6,pan.ifr*over*(c.power<.5?1.6:1)*(c.food<.5?1.5:1)*(c.gdpc<2?1.3:1));
-    c.I-=rec;c.R+=rec*(1-ifr);kill(c,rec*ifr*c.pop,'pandemie');
-    
-    if(P.vaccinate&&G.vaccine>=1){const v=Math.min(c.S,.007*dt*(c.gdpc>8?1:.45));c.S-=v;c.R+=v;}
-    const tot=c.S+c.I+c.R;c.S/=tot;c.I/=tot;c.R/=tot;
-    if(!c.hadCase&&c.I*c.pop>3&&c.pop0>2e5){c.hadCase=true;alertE(1,'🦠',`${c.fr} : premier cas de ${pan.name} détecté à ${c.cities[0].name}`,c.i,0,null);}
-  }else c.I=0;
+  // épidémies
+  let Itot=0;
+  for(const D of G.pans){const z=dz(c,D.id);
+    let beta=D.R0/D.dur*(1-L*.7)*(P.masks?.75:1)*(P.curfew?.85:1)*(c.water<.4?1.35:1)*(c.unrest>.6?1.15:1);
+    if(D.richK&&c.gdpc>20)beta*=D.richK;if(D.poorK&&c.gdpc<3)beta*=1.4;if(D.waterK)beta*=c.water<.7?1+(.7-c.water)*6:.5;
+    let nbI=0;for(const j of c.nb){const o=A[j].dz[D.id];if(o)nbI+=o.I;}nbI/=Math.max(1,c.nb.length);
+    const imp=(nbI*.012+D.gI*.004*(c.gdpc>10?2:1))*(P.borders?.04:1);
+    const ni=Math.min(z.S,beta*z.S*(z.I+imp)*dt);z.S-=ni;z.I+=ni;
+    const rec=Math.min(z.I,z.I/D.dur*dt),hc=hcap(c),over=c.I>hc?Math.min(1.8,1+(c.I/hc-1)*.15):1;
+    const ifr=Math.min(.7,D.ifr*over*(c.power<.5?1.6:1)*(c.food<.5?1.5:1)*(c.gdpc<2?1.3:1)*(D.richK&&c.gdpc>20?Math.sqrt(D.richK):1)*Math.pow(1/hb,.35));
+    z.I-=rec;z.R+=rec*(1-ifr);const kd=Math.min(rec*ifr*c.pop,c.pop*.5);kill(c,kd,'pandemie');D.dead+=kd;
+    if(P.vaccinate&&D.vaccine>=1){const v=Math.min(z.S,.007*dt*(c.gdpc>8?1:.45));z.S-=v;z.R+=v;}
+    const tot=z.S+z.I+z.R;z.S/=tot;z.I/=tot;z.R/=tot;Itot+=z.I;
+    if(!z.had&&z.I*c.pop>3&&c.pop0>2e5){z.had=true;alertE(1,D.ic,`${c.fr} : premier cas de ${D.n} détecté à ${c.cities[0].name}`,c.i,0,null);}
+  }
+  c.I=Itot;
   // morts faim / soif
-  if(c.food<.55)kill(c,c.pop*Math.pow(.55-c.food,2)*.0011*(P.ration?.5:1)*(P.aid?.6:1)*dt,'faim');
-  if(c.water<.35)kill(c,c.pop*(.35-c.water)*.0012*dt,'soif');
+  if(c.food<.55)kill(c,c.pop*Math.pow(.55-c.food,2)*.0011*(P.ration?.5:1)*(P.aid?.6:1)*(1+Math.max(0,fp)*.8)*clamp(1-tx*.6,.5,1.3)*dt,'faim');
+  if(c.water<.35)kill(c,c.pop*(.35-c.water)*.0012*(1+Math.max(0,wp)*.8)*dt,'soif');
   // démographie naturelle
   const g=(c.gdpc<3?.021:c.gdpc<15?.009:.001)/365;c.pop*=1+g*dt*(c.food>.7?1:.2);
   // économie
   let sh=0;
-  if(P.lockdown)sh-=.0009;if(P.powercut)sh-=.004;if(P.watercut)sh-=.002;if(P.internet)sh-=.0025;if(war)sh-=.0024;if(P.borders)sh-=.0004;
+  sh-=L*.0009;sh-=(1-PS)*.004;sh-=(1-WS)*.002;if(P.internet)sh-=.0025;if(war)sh-=.0024;if(P.borders)sh-=.0004;
   sh-=c.fin*.0016;sh-=Math.min(.002,c.I*.02);if(c.unrest>.6)sh-=(c.unrest-.6)*.005;if(c.food<.5)sh-=.001;if(c.cyber>0)sh-=.002;
-  if(P.print)sh+=.0007;if(P.space)sh-=.00025;if(P.green)sh-=.0002;if(P.army)sh-=.0004;if(P.austerity)sh-=.0005;if(P.research)sh-=.0001;if(P.aid)sh-=.0001;
+  if(P.print)sh+=.0007;if(P.space)sh-=.00025;if(P.green)sh-=.0002;if(P.austerity)sh-=.0005;if(P.research)sh-=.0001;if(P.aid)sh-=.0001;
+  sh-=tx*.002;sh+=dev*.0006;sh-=rt*.012;sh-=ep*.0008;sh-=(V.health-8)/100*.003;sh-=ab*.0006;
   c.gdp=clamp(c.gdp+(sh+(1-c.gdp)*.009)*dt,.05,2.5);
-  c.unemp+=((.045+Math.max(0,1-c.gdp)*.55+(P.lockdown?.05:0)+(P.internet?.03:0))-c.unemp)*Math.min(1,.03*dt);c.unemp=clamp(c.unemp,.01,.65);
-  const it=.02+(P.print?.24:0)+Math.max(0,.6-c.food)*.7+(c.power<.5?.06:0)+(P.aid?.02:0)-(P.austerity?.025:0)+c.fin*.03+(war?.05:0)+(P.borders?.01:0);
-  c.infl+=(it-c.infl)*Math.min(1,.012*dt);
+  c.unemp+=((.045+Math.max(0,1-c.gdp)*.55+L*.05+(P.internet?.03:0)+rt*.8+Math.max(0,wg)*.07-Math.max(0,-wg)*.02)-c.unemp)*Math.min(1,.03*dt);c.unemp=clamp(c.unemp,.01,.65);
+  const it=.02+(P.print?.24:0)+Math.max(0,.6-c.food)*.7+(c.power<.5?.06:0)+(P.aid?.02:0)-(P.austerity?.025:0)+c.fin*.03+(war?.05:0)+(P.borders?.01:0)
+    +dev*.22-rt*1.5+fp*.06+ep*.05+wg*.02;
+  c.infl+=(Math.max(-.05,it)-c.infl)*Math.min(1,.012*dt);
   let nbF=0;for(const j of c.nb)nbF=Math.max(nbF,A[j].fin);
-  c.fin+=(Math.max(0,G.fin*1.3-c.fin)*.01+Math.max(0,nbF-c.fin)*.006)*(P.borders?.4:1)*dt*(c.gdpc>5?1:.5);
+  c.fin+=(Math.max(0,G.fin*1.3-c.fin)*.01+Math.max(0,nbF-c.fin)*.006)*(P.borders?.4:1)*dt*(c.gdpc>5?1:.5)+(Math.abs(V.money)>30?.0015:0)*dt+Math.max(0,rt-.08)*.01*dt;
   c.fin-=c.fin*(.0035+(P.banks?.014:0)+(P.austerity?.002:0))*dt;c.fin=clamp(c.fin,0,1);
-  const mt=100*c.gdp*(1-c.fin*.6)*(war?.85:1)*(1-Math.min(.4,c.I*3))*(1-Math.max(0,c.infl-.1)*.5)*(c.cyber>0?.85:1);
+  const mt=100*c.gdp*(1-c.fin*.6)*(war?.85:1)*(1-Math.min(.4,c.I*3))*(1-Math.max(0,c.infl-.1)*.5)*(c.cyber>0?.85:1)*(1-rt*1.5);
   c.market+=(mt-c.market)*Math.min(1,.1*dt)+(Math.random()-.5)*Math.sqrt(dt)*1.2;c.market=Math.max(2,c.market);
   // colère
   c.rd*=Math.max(0,1-dt/14);
   let d=.06+c.unemp*.8+Math.max(0,c.infl-.05)*1.2+Math.max(0,.92-c.food)*1+(1-c.water)*1.1+(1-c.power)*.35+Math.min(.35,c.rd/c.pop*150)
-    +(P.lockdown?.1:0)+(P.watercut?.25:0)+(P.powercut?.12:0)+(P.austerity?.12:0)+(P.banks?.05:0)+(war?.08:0)+c.fin*.1-(P.aid?.12:0);
+    +L*.1+(1-WS)*.25+(1-PS)*.12+(P.austerity?.12:0)+(P.banks?.05:0)+(war?.08:0)+c.fin*.1-(P.aid?.12:0)
+    +Math.max(0,tx)*.5+Math.max(0,-tx)*.2+fp*.3+wp*.2+ep*.15-wg*.12+rt*.6;
   const damp=(P.curfew?.6:1)*(P.internet?.72:1);
   c.unrest+=(clamp(d*damp,0,1)-c.unrest)*Math.min(1,.03*dt);
-  c.approval+=(clamp(.64-c.unrest*.55-(P.curfew?.1:0)-(P.internet?.12:0)-(P.watercut?.22:0)-(P.ration?.06:0)-(P.banks?.05:0)-(P.lockdown?.05:0),0,1)-c.approval)*Math.min(1,.03*dt);
+  c.approval+=(clamp(.64-c.unrest*.55-(P.curfew?.1:0)-(P.internet?.12:0)-(1-WS)*.22-(P.ration?.06:0)-(P.banks?.05:0)-L*.05,0,1)-c.approval)*Math.min(1,.03*dt);
   if(c.unrest>.8&&c.pop0>3e5&&Math.random()<.012*dt)revolution(c);
-  c.mil+=((P.army?.85:.2)-c.mil)*Math.min(1,.01*dt);
+  c.mil+=((.08+V.army*.08)-c.mil)*Math.min(1,.01*dt);
   if(c.drought>0)c.drought-=dt;if(c.cyber>0)c.cyber-=dt;if(c.famine>0)c.famine-=dt;
 }
 function revolution(c,forced){
-  c.pol={};c.unrest=forced?.95:.45;c.approval=.6;c.gdp*=.94;c.market*=.85;
+  c.pol={};c.sl=SLDEF();c.unrest=forced?.95:.45;c.approval=.6;c.gdp*=.94;c.market*=.85;
   kill(c,c.pop*rnd(1e-5,8e-5),'guerre');
   alertE(2,'✊',`Révolution ${c.fr==='France'?'en France':'– '+c.fr} : le gouvernement est renversé à ${c.cities[0].name}`,c.i,0,null);
 }
 function stepPairs(dt){
   for(const p of PAIRS){const a=A[p.a],b=A[p.b];
-    const d=.05+p.base+((a.pol.army?1:0)+(b.pol.army?1:0))*.24+(a.unrest+b.unrest)*.17+(2-a.food-b.food)*.22+(2-a.water-b.water)*.32-((a.pol.diplomacy?1:0)+(b.pol.diplomacy?1:0))*.32;
+    const d=.05+p.base+((a.sl.army+b.sl.army)-4)*.045+(a.unrest+b.unrest)*.17+(2-a.food-b.food)*.22+(2-a.water-b.water)*.32-((a.pol.diplomacy?1:0)+(b.pol.diplomacy?1:0))*.32;
     p.t+=(clamp(d,0,1)-p.t)*Math.min(1,.006*dt)+(Math.random()-.5)*.003*Math.sqrt(dt);p.t=clamp(p.t,0,1);
     if(!p.war&&p.t>.78&&Math.random()<.02*dt){const att=(a.mil+a.unrest>b.mil+b.unrest)?a:b;startWar(p,att.i);}
     if(p.war){p.days+=dt;const at=A[p.att],df=A[p.att===p.a?p.b:p.a];
@@ -630,9 +666,12 @@ function stepGlobal(dt){
     let rich=0;for(const c of A)if(c.gdpc>20)rich+=c.pop;for(const c of A)if(c.gdpc>20)c.pop-=g*c.pop/rich*.5;}
     for(const m of[1e4,1e6,1e8,1e9])if(G.mars>=m&&!G.cd['mars'+m]){G.cd['mars'+m]=1;alertE(3,'🔴',`Exode spatial : ${fmtN(m)} humains vivent désormais hors de la Terre`,-1,-1,null);}}
   // recherche
-  if(G.pan){let r=.0012;for(const c of A)if(c.pol.research)r+=c.w*.03;G.research+=r*dt;
-    if(G.vaccine<1&&G.research>=1){G.vaccine=1;alertE(3,'💉',`Vaccin découvert contre le ${G.pan.name} ! Activez la vaccination de masse.`,-1,-1,null);}
-    if(G.day-G.pan.start>60&&G.I<2e-9){alertE(3,'✅',`La pandémie de ${G.pan.name} est terminée. Bilan : ${fmtN(G.dead.pandemie-G.pan.d0)} morts`,-1,-1,null);G.pan=null;}}
+  let rb=0;for(const c of A)if(c.pol.research)rb+=c.w*.03;let hw=0;for(const c of A)hw+=c.w*c.sl.health/8;
+  for(const D of G.pans){let gi=0;for(const c of A){const z=c.dz[D.id];if(z)gi+=z.I*c.pop;}D.gI=gi/G.pop;
+    D.research+=(.0012+rb)*hw*dt;
+    if(D.vaccine<1&&D.research>=1){D.vaccine=1;alertE(3,'💉',`Vaccin découvert contre : ${D.n} ! Active la vaccination de masse.`,-1,-1,null);}
+    if(G.day-D.start>60&&D.gI<2e-9){D.done=1;alertE(3,'✅',`L’épidémie de ${D.n} est terminée. Bilan : ${fmtN(D.dead)} morts`,-1,-1,null);for(const c of A)delete c.dz[D.id];}}
+  G.pans=G.pans.filter(D=>!D.done);
   // aléatoire
   if(G.random){
     const r=()=>Math.random()<dt;
@@ -640,7 +679,7 @@ function stepGlobal(dt){
     if(r()&&Math.random()<.004){const c=weighted(A.filter(c=>CYCLONE.has(c.name)));if(c){const city=ccity(c),n=Math.round(cpop(c,city)*rnd(1e-5,2e-4));kill(c,n,'catastrophe');c.food*=.93;c.gdp*=.995;alertE(1,'🌀',`Cyclone sur ${city.name} (${c.fr}) : ${fmtN(n)} morts`,c.i,c.cities.indexOf(city),'cyc'+c.i,20);}}
     if(r()&&Math.random()<.002*(1+Math.max(0,G.temp-1.3)*2)){const c=weighted(A.filter(c=>c.cent[1]<40&&c.cent[1]>-40));if(c)crisis('drought',c,true);}
     if(r()&&Math.random()<.0006)crisis('krach',weighted(A.filter(c=>c.gdpc>15)),true);
-    if(!G.pan&&r()&&Math.random()<.00035)crisis('pandemic',weighted(live()),true);
+    if(G.pans.length<2&&r()&&Math.random()<.00035)disease(pick(DISEASES.filter(d=>d.id!=='measles')).id,weighted(live()),true);
     if(r()&&Math.random()<.003*(G.temp-1)){const c=weighted(A.filter(c=>Math.abs(c.cent[1])<45));if(c){const city=ccity(c);alertE(0,'🌡️',`Record de chaleur à ${city.name} : ${Math.round(42+G.temp*2+Math.random()*4)} °C`,c.i,c.cities.indexOf(city),'heat'+c.i,90);}}
   }
 }
@@ -653,15 +692,15 @@ function weekly(){
     const w=c.wk,P=c.pol;
     if(w.faim>300)alertE(2,'🍞',`${c.fr} : les gens meurent de faim — ${fmtN(w.faim)} morts cette semaine`,c.i,0,'faim'+c.i,28);
     if(w.soif>300){const ci=Math.floor(Math.random()*c.cities.length);alertE(2,'🚱',`${c.cities[ci].name} : plus d’eau potable, ${fmtN(w.soif)} morts de soif en 7 jours`,c.i,ci,'soif'+c.i,28);}
-    if(G.pan&&w.pandemie>800)alertE(1,'⚰️',`${c.fr} : ${fmtN(w.pandemie)} morts du ${G.pan.name} cette semaine`,c.i,0,'pm'+c.i,35);
-    if(G.pan&&c.I>hcap(c)*1.3){const ci=Math.floor(Math.random()*c.cities.length);alertE(1,'🏥',`Hôpitaux saturés à ${c.cities[ci].name} (${c.fr})`,c.i,ci,'hs'+c.i,70);}
+    if(G.pans.length&&w.pandemie>800)alertE(1,'⚰️',`${c.fr} : ${fmtN(w.pandemie)} morts d’épidémie cette semaine`,c.i,0,'pm'+c.i,35);
+    if(G.pans.length&&c.I>hcap(c)*1.3){const ci=Math.floor(Math.random()*c.cities.length);alertE(1,'🏥',`Hôpitaux saturés à ${c.cities[ci].name} (${c.fr})`,c.i,ci,'hs'+c.i,70);}
     const drop=(c.mkW-c.market)/c.mkW;if(drop>.08&&c.gdpc>4)alertE(1,'📉',`Krach : la Bourse de ${c.cities[0].name} perd ${Math.round(drop*100)} % en une semaine`,c.i,0,'mk'+c.i,30);
     if(c.unemp>.2)alertE(1,'💼',`${c.fr} : chômage record à ${pct(c.unemp)}`,c.i,0,'un'+c.i,150);
     if(c.infl>.25)alertE(1,'💸',`${c.fr} : hyperinflation, les prix grimpent de ${Math.round(c.infl*100)} % par an`,c.i,0,'inf'+c.i,150);
     if(c.unrest>.74)alertE(2,'✊',`${c.fr} : manifestations massives, le pouvoir vacille`,c.i,0,'ur2'+c.i,60);
     else if(c.unrest>.55){const ci=Math.floor(Math.random()*c.cities.length);alertE(1,'🔥',`Émeutes à ${c.cities[ci].name} (${c.fr})`,c.i,ci,'ur'+c.i,45);}
-    if(c.water<.5&&!P.watercut)alertE(1,'💧',`${c.fr} : pénurie d’eau, rationnement aux robinets`,c.i,0,'wa'+c.i,80);
-    if(P.watercut&&c.water<.2)alertE(1,'🚱',`${c.fr} : l’eau est coupée, files d’attente aux camions-citernes`,c.i,0,'wc'+c.i,60);
+    if(c.water<.5&&c.sl.water>=50)alertE(1,'💧',`${c.fr} : pénurie d’eau, rationnement aux robinets`,c.i,0,'wa'+c.i,80);
+    if(c.sl.water<50&&c.water<.3)alertE(1,'🚱',`${c.fr} : l’eau est coupée, files d’attente aux camions-citernes`,c.i,0,'wc'+c.i,60);
     if(c.food<.6&&w.faim<=300)alertE(1,'🛒',`${c.fr} : rayons vides, pénurie alimentaire`,c.i,0,'fd'+c.i,80);
     // réfugiés
     const bad=(c.food<.5?1:0)+(c.water<.4?1:0)+(c.wars.length?1:0)+(c.unrest>.75?.5:0);
@@ -683,14 +722,22 @@ function simulate(days){
 
 /* ====================== CRISES ====================== */
 const VNAMES=['SRAS-3','H5N-X','Virus Kraken','Fièvre K-27','Variant Oméga','Grippe Céleste','Nipah-B','Virus Médusa'];
+function disease(id,c,auto){
+  if(!c)return;
+  if(id!=='x'&&G.pans.find(D=>D.id===id)){toast('Cette épidémie est déjà en cours.');return;}
+  if(G.pans.length>=4){toast('Déjà 4 épidémies en cours : attends qu’une se termine.');return;}
+  const B=DISEASES.find(d=>d.id===id);
+  const D=B.rand?Object.assign({},B,{id:'x'+Math.floor(Math.random()*1e6),n:pick(VNAMES),R0:rnd(1.8,4),ifr:rnd(.002,.05),dur:rnd(6,14)}):Object.assign({},B);
+  Object.assign(D,{start:G.day,dead:0,gI:0,research:B.vacK||0,vaccine:(B.vacK||0)>=1?1:0});
+  G.pans.push(D);
+  if(D.imm)for(const o of A){const z=dz(o,D.id);z.R=o.gdpc>10?.94:o.gdpc>3?.86:.66;z.S=1-z.R;}
+  const z=dz(c,D.id);z.I=Math.max(30/c.pop,1e-7);z.S-=z.I;z.had=true;
+  alertE(2,D.ic,`${D.n} : une épidémie se déclare à ${c.cities[0].name} (${c.fr})`,c.i,0,null);dirty=true;
+}
 function crisis(id,c,auto){
   if(!c)return;const ci=0;
   switch(id){
-    case'pandemic':{if(G.pan){toast('Une pandémie est déjà en cours.');return;}
-      const name=pick(VNAMES);G.pan={name,R0:rnd(2,3.2),ifr:rnd(.0015,.006),dur:rnd(8,12),start:G.day,d0:G.dead.pandemie};G.research=0;G.vaccine=0;
-      for(const o of A){o.hadCase=false;o.S=1;o.I=0;o.R=0;}
-      c.I=Math.max(30/c.pop,1e-7);c.S=1-c.I;c.hadCase=true;
-      alertE(2,'🦠',`Un nouveau virus, le ${name}, apparaît à ${c.cities[0].name} (${c.fr})`,c.i,0,null);break;}
+    case'pandemic':disease('x',c,auto);return;
     case'krach':c.fin=1;c.market*=.7;alertE(2,'📉',`Krach à ${c.cities[0].name} : les banques de ${c.fr} vacillent, la panique gagne le monde`,c.i,0,null);break;
     case'drought':c.drought=rnd(120,240);for(const j of c.nb)if(Math.random()<.5)A[j].drought=Math.max(A[j].drought,rnd(60,150));alertE(auto?1:2,'🏜️',`Sécheresse historique ${c.fr==='France'?'en France':'– '+c.fr} : les réservoirs se vident`,c.i,0,'dr'+c.i,60);break;
     case'famine':c.famine=rnd(90,180);c.food*=.7;alertE(2,'🌾',`${c.fr} : les récoltes sont détruites, la famine menace`,c.i,0,null);break;
@@ -750,10 +797,9 @@ function drawGlobe(now){
   for(const c of A)if(c.wars.length){gx.strokeStyle=`rgba(255,60,80,${.4+.5*pulse})`;gx.lineWidth=1.4;gx.beginPath();path(c.feat);gx.stroke();}
   if(sel>=0){gx.strokeStyle='#fff';gx.lineWidth=1.8;gx.beginPath();path(A[sel].feat);gx.stroke();}
   // nuit
-  if(SPEEDS[speed].v<=1){const d=new Date(START+G.day*864e5),h=d.getUTCHours()+d.getUTCMinutes()/60,doy=G.day%365;
-    const sun=[180-h*15,23.44*Math.sin(TAU*(doy-81)/365)];const anti=[sun[0]+180,-sun[1]];
-    gx.fillStyle='rgba(2,6,22,.42)';gx.beginPath();path(d3.geoCircle().center(anti).radius(90)());gx.fill();
-    gx.fillStyle='rgba(2,6,22,.25)';gx.beginPath();path(d3.geoCircle().center(anti).radius(80)());gx.fill();}
+  if(NK>.01){const h=(G.day*24)%24,doy=G.day%365;
+    const anti=[180-h*15+180,-23.44*Math.sin(TAU*(doy-81)/365)];
+    for(const[r,a]of[[96,.07],[92,.09],[88,.1],[84,.1],[78,.12]]){gx.fillStyle=`rgba(2,6,22,${a*NK})`;gx.beginPath();path(d3.geoCircle().center(anti).radius(r).precision(3)());gx.fill();}}
   // ombrage 3D
   gr=gx.createRadialGradient(tx-sc*.35,ty-sc*.35,sc*.2,tx,ty,sc);gr.addColorStop(0,'rgba(255,255,255,.07)');gr.addColorStop(.7,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,10,.45)');
   gx.fillStyle=gr;gx.beginPath();path({type:'Sphere'});gx.fill();
@@ -764,8 +810,8 @@ function drawGlobe(now){
   gx.setLineDash([]);
   // villes
   const k=kScale();
-  if(k>1.7){gx.font='600 11px Inter';gx.textAlign='left';
-    for(const c of A){if(!c.pop0)continue;const show=k>3.2||c.i===sel;
+  if(k>1.3){gx.font='600 11px Inter';gx.textAlign='left';
+    for(const c of A){if(!c.pop0||(k<2.4&&c.i!==sel))continue;const show=k>3.2||c.i===sel;
       c.cities.forEach((ct,ci)=>{if(!ct.cap&&!show)return;const ll=[ct.lon,ct.lat];if(d3.geoDistance(ll,ctr)>1.45)return;const p=proj(ll);
         const r=ct.cap?3.2:2.3;gx.fillStyle=ct.damage>.3?'#ff6b6b':'#fff';gx.beginPath();gx.arc(p[0],p[1],r,0,7);gx.fill();gx.strokeStyle='rgba(0,0,0,.6)';gx.lineWidth=1;gx.stroke();
         if(k>2.6&&(ct.cap||k>4.5||c.i===sel)){gx.fillStyle='rgba(0,0,0,.6)';gx.fillText(ct.name,p[0]+6,p[1]+4);gx.fillStyle='#e8eefc';gx.fillText(ct.name,p[0]+5,p[1]+3);}});}}
@@ -781,8 +827,8 @@ function stepFX(dt){for(const m of missiles){m.t+=dt;if(m.t>=m.dur&&!m.done){m.d
   for(const b of booms)b.t+=dt;booms=booms.filter(b=>b.t<1.2);}
 function hitCountry(x,y){const ll=proj.invert([x,y]);if(!ll)return -1;const ctr=[-proj.rotate()[0],-proj.rotate()[1]];if(d3.geoDistance(ll,ctr)>Math.PI/2)return -1;
   for(const c of A)if(d3.geoContains(c.feat,ll))return c.i;return -1;}
-function hitCity(x,y){if(kScale()<1.7)return null;const ctr=[-proj.rotate()[0],-proj.rotate()[1]],k=kScale();let best=null,bd=14;
-  for(const c of A){if(!c.pop0)continue;c.cities.forEach((ct,ci)=>{if(!ct.cap&&!(k>3.2||c.i===sel))return;const ll=[ct.lon,ct.lat];if(d3.geoDistance(ll,ctr)>1.45)return;const p=proj(ll),d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=[c.i,ci];}});}return best;}
+function hitCity(x,y){if(kScale()<1.3)return null;const ctr=[-proj.rotate()[0],-proj.rotate()[1]],k=kScale();let best=null,bd=14;
+  for(const c of A){if(!c.pop0||(k<2.4&&c.i!==sel))continue;c.cities.forEach((ct,ci)=>{if(!ct.cap&&!(k>3.2||c.i===sel))return;const ll=[ct.lon,ct.lat];if(d3.geoDistance(ll,ctr)>1.45)return;const p=proj(ll),d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=[c.i,ci];}});}return best;}
 gcv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});try{gcv.setPointerCapture(e.pointerId)}catch(_){}
   if(ptrs.size===1)drag={x:e.clientX,y:e.clientY,r:proj.rotate(),moved:0};else if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch0={d:Math.hypot(a.x-b.x,a.y-b.y),s:proj.scale()};drag=null;}anim=null;});
 gcv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -850,9 +896,13 @@ function moveWalker(a,dt,s){
   const w=s.rw(a.li);const off=a.car?(a.dir>0?w/4:-w/4):a.side*(w/2-4);
   if(a.h){a.x=a.pos;a.y=a.line+off;}else{a.x=a.line+off;a.y=a.pos;}
 }
-function cityState(){const c=scene.c,ct=scene.ct,P=c.pol;const d=new Date(START+G.day*864e5);const lh=((d.getUTCHours()+d.getUTCMinutes()/60+ct.lon/15)%24+24)%24;
-  const night=SPEEDS[speed].v>1?0:clamp(lh<6?1:lh<8?(8-lh)/2:lh<19?0:lh<21?(lh-19)/2:1,0,1);
-  return{c,P,lh,night,sick:clamp(c.I*6,0,.6),out:P.lockdown?.22:(P.curfew&&night>.5)?.08:1-night*.6,food:c.food,water:c.water,power:c.power,unemp:c.unemp,unrest:c.unrest,fin:c.fin,war:c.wars.length>0,dmg:ct.damage,infl:c.infl};}
+let NK=1;
+const localHour=lon=>(((G.day*24)%24+lon/15)%24+24)%24;
+function sunE(lon){return Math.cos((localHour(lon)-13)/24*TAU);}
+function localNight(lon){const e=sunE(lon),t=clamp((.18-e)/.5,0,1);return t*t*(3-2*t)*NK;}
+function cityState(){const c=scene.c,ct=scene.ct,P=c.pol;const lh=localHour(ct.lon);
+  const night=localNight(ct.lon),L=c.sl.lock/100;
+  return{c,P,L,wcut:c.sl.water<50,lh,night,sick:clamp(c.I*6,0,.6),out:L>.05?1-L*.8:(P.curfew&&night>.5)?.08:1-night*.6,food:c.food,water:c.water,power:c.power,unemp:c.unemp,unrest:c.unrest,fin:c.fin,war:c.wars.length>0,dmg:ct.damage,infl:c.infl};}
 let CS=null,csT=0;
 function enterCity(i,ci){const c=A[i];if(!c.pop0)return;scene=genCity(c,ci);curCity={c,ci};view='city';sel=i;
   gcv.style.display='none';ccv.style.display='block';$('#chud').style.display='block';$('#world').style.display='none';$('#legend').style.display='none';$('#layers').style.display='none';$('#mars').style.display='none';
@@ -867,7 +917,7 @@ function assign(){const s=CS,P=scene.ppl,n=P.length;let k=0;const roles=[];
   const nMk=s.food<.75?q((.75-s.food)*90):0,nBk=s.fin>.35?q(s.fin*25):0,nWa=s.water<.6?q((.6-s.water)*80):0,nPr=s.unrest>.45?q((s.unrest-.45)*160):0,nHo=s.sick>.02?q(s.sick*40):0;
   for(const[r,c]of[['mk',nMk],['bk',nBk],['wa',nWa],['pr',nPr],['ho',nHo]])for(let j=0;j<c&&k<n;j++)roles[k++]=[r,j];
   P.forEach((a,i)=>{const r=roles[i];a.role=r?r[0]:'walk';a.qi=r?r[1]:0;a.vis=a.role!=='walk'||a.r1<s.out;a.sick=a.r2<s.sick;a.weak=s.food<.45&&a.r3<(.45-s.food)*1.5;a.jerry=s.water<.5&&a.r4<.4;});
-  scene.cars.forEach((a,i)=>{a.vis=a.r1<(s.P.lockdown?.25:1-s.night*.5)*(s.power<.3?.5:1);a.kind=i<Math.round(s.sick*30)?'amb':i<Math.round(s.sick*30)+((s.unrest>.5||s.P.curfew||s.P.lockdown)?4:0)?'pol':(s.war&&i>75)?'mil':'car';});
+  scene.cars.forEach((a,i)=>{a.vis=a.r1<(s.L>.05?1-s.L*.75:1-s.night*.5)*(s.power<.3?.5:1);a.kind=i<Math.round(s.sick*30)?'amb':i<Math.round(s.sick*30)+((s.unrest>.5||s.P.curfew||s.P.lockdown)?4:0)?'pol':(s.war&&i>75)?'mil':'car';});
   scene.tanker=s.water<.5;}
 function poiPos(kind){const p=scene.pois.find(p=>p.kind===kind);return p?p.ent:{x:900,y:900};}
 function stepCity(dt){const s=scene;s.t+=dt;
@@ -901,7 +951,7 @@ const PHR={
   mars:['Mon cousin part sur Mars !','Il paraît qu’on vit mieux sur Mars']};
 function phraseFor(a){const s=CS;if(a.role==='pr')return pick(PHR.protest);if(a.role==='bk')return pick(PHR.bank);if(a.role==='wa')return pick(PHR.water);if(a.role==='mk')return pick(PHR.hungry);
   const o=[];if(a.sick)o.push(...PHR.sick);if(a.weak||s.food<.6)o.push(...PHR.hungry);if(s.water<.5)o.push(...PHR.water);if(s.war)o.push(...PHR.war,...PHR.war);if(s.unemp>.15)o.push(...PHR.unemp);if(s.infl>.15)o.push(...PHR.infl);
-  if(s.P.lockdown)o.push(...PHR.lock);if(s.power<.4)o.push(...PHR.dark);if(G.mars>1000)o.push(...PHR.mars);if(!o.length||Math.random()<.2)o.push(...PHR.normal);return pick(o);}
+  if(s.L>.3)o.push(...PHR.lock);if(s.power<.4)o.push(...PHR.dark);if(G.mars>1000)o.push(...PHR.mars);if(!o.length||Math.random()<.2)o.push(...PHR.normal);return pick(o);}
 function statusOf(a){const s=CS;if(a.role==='pr')return'manifestant·e';if(a.role==='ho')return'attend aux urgences';if(a.role==='bk')return'fait la queue à la banque';if(a.role==='wa')return'attend le camion-citerne';if(a.role==='mk')return'fait la queue pour manger';
   if(a.sick)return'malade';if(a.weak)return'affaibli·e par la faim';return a.job==='sans emploi'||a.r3<s.unemp?'au chômage':'en route';}
 function drawCity(){
@@ -929,7 +979,7 @@ function drawCity(){
     g.fillStyle=st.d;g.fillRect(p.x+p.w*.15,p.y+p.h*.15,p.w*.7,p.h*.7);
     if(p.kind==='hospital'){g.fillStyle='#e23b3b';g.fillRect(p.x+p.w/2-4,p.y+p.h/2-13,8,26);g.fillRect(p.x+p.w/2-13,p.y+p.h/2-4,26,8);}
     if(z>.55){g.font=`700 ${12/z}px Inter`;g.fillStyle='#fff';g.fillText(st.n,p.x+p.w/2,p.y-6);
-      const closed=(p.kind==='bank'&&CS.fin>.6)||((p.kind==='bakery'||p.kind==='market'||p.kind==='market2')&&(CS.food<.35||CS.P.lockdown&&p.kind==='bakery'))||(p.kind==='school'&&CS.P.lockdown);
+      const closed=(p.kind==='bank'&&CS.fin>.6)||((p.kind==='bakery'||p.kind==='market'||p.kind==='market2')&&(CS.food<.35||CS.L>.6&&p.kind==='bakery'))||(p.kind==='school'&&CS.L>.4);
       const full=p.kind==='hospital'&&CS.sick>.08;
       if(closed||full){g.fillStyle=full?'#ff9f1a':'#ff4d5e';g.fillRect(p.x+p.w/2-26,p.y+p.h/2-8,52,16);g.fillStyle='#fff';g.font='800 9px Inter';g.fillText(full?'SATURÉ':'FERMÉ',p.x+p.w/2,p.y+p.h/2+3);}}}
   if(scene.tanker){const p=s.plaza;g.fillStyle='#2b6cb0';g.fillRect(p.x+p.w/2-14,p.y+p.h-2,28,10);g.fillStyle='#ddd';g.fillRect(p.x+p.w/2+10,p.y+p.h-2,6,10);}
@@ -954,7 +1004,9 @@ function drawCity(){
   for(const b of s.booms){const t=b.t/2;g.fillStyle=`rgba(255,200,120,${1-t})`;g.beginPath();g.arc(b.x,b.y,10+t*90,0,7);g.fill();g.strokeStyle=`rgba(255,255,255,${(1-t)*.8})`;g.lineWidth=3;g.beginPath();g.arc(b.x,b.y,20+t*160,0,7);g.stroke();}
   // nuit
   g.setTransform(DPR,0,0,DPR,0,0);
-  if(CS.night>0){g.fillStyle=`rgba(4,8,28,${CS.night*.72})`;g.fillRect(0,0,W,H);
+  const NT=localNight(s.ct.lon),tw=Math.max(0,1-Math.abs(sunE(s.ct.lon)-.05)/.35)*NK;CS.night=NT;
+  if(tw>.01){g.fillStyle=`rgba(255,120,50,${tw*.13})`;g.fillRect(0,0,W,H);}
+  if(CS.night>.003){g.fillStyle=`rgba(4,8,28,${CS.night*.72})`;g.fillRect(0,0,W,H);
     if(CS.power>.4){g.setTransform(DPR*z,0,0,DPR*z,DPR*(W/2-cam.x*z),DPR*(H/2-cam.y*z));g.globalCompositeOperation='lighter';
       g.fillStyle=`rgba(255,200,110,${.5*CS.night*CS.power})`;for(const b of s.bld){if(b.ruin||!vis(b.x,b.y,b.w,b.h))continue;for(const w of b.win)if(w[2]<.45)g.fillRect(w[0],w[1],1.6,1.6);}
       for(const l of s.lamps){if(!vis(l[0]-20,l[1]-20,40,40))continue;const gr=g.createRadialGradient(l[0],l[1],0,l[0],l[1],22);gr.addColorStop(0,`rgba(255,200,120,${.28*CS.night})`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(l[0]-22,l[1]-22,44,44);}
@@ -992,9 +1044,9 @@ function renderCityHud(){if(!scene)return;const s=CS,c=scene.c,ct=scene.ct;const
   const pop=cpop(c,ct);
   const ind=(ic,l,v,good)=>`<div>${ic} ${l}<b style="color:${good?'var(--ok)':v==='—'?'':'var(--bad)'}">${v}</b></div>`;
   const news=[];if(s.war)news.push('💥 Le pays est en guerre : sirènes et abris.');if(s.sick>.02)news.push(`🦠 ${pct(c.I,1)} des habitants sont malades.`);
-  if(s.food<.6)news.push('🛒 Files d’attente devant les magasins.');if(s.water<.5)news.push(s.P.watercut?'🚱 L’eau est coupée par le gouvernement.':'💧 L’eau est rationnée.');
+  if(s.food<.6)news.push('🛒 Files d’attente devant les magasins.');if(s.water<.5)news.push(s.wcut?'🚱 L’eau est coupée par le gouvernement.':'💧 L’eau est rationnée.');
   if(s.power<.5)news.push('🔌 Coupures d’électricité.');if(s.unrest>.5)news.push('✊ Manifestations dans les rues.');if(s.fin>.4)news.push('🏦 Panique bancaire : les gens retirent leur argent.');
-  if(s.P.lockdown)news.push('🏠 Confinement : rues presque vides.');if(s.P.curfew)news.push('🌙 Couvre-feu en vigueur.');if(ct.damage>.2)news.push(`🏚️ ${pct(Math.min(1,ct.damage*.8))} des bâtiments détruits.`);
+  if(s.L>.3)news.push(`🏠 Confinement à ${Math.round(s.L*100)} % : rues ${s.L>.6?'presque vides':'clairsemées'}.`);if(s.P.curfew)news.push('🌙 Couvre-feu en vigueur.');if(ct.damage>.2)news.push(`🏚️ ${pct(Math.min(1,ct.damage*.8))} des bâtiments détruits.`);
   if(!news.length)news.push('☀️ La vie suit son cours.');
   $('#chud').innerHTML=`<h2>${ct.name}</h2><div class="muted">${c.fr} · ${fmtN(pop)} hab. · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} heure locale</div>
    <div class="ind">${ind('🦠','Malades',pct(s.sick/6,1),s.sick<.02)}${ind('🍞','Nourriture',pct(s.food),s.food>.7)}${ind('💧','Eau',pct(s.water),s.water>.7)}${ind('⚡','Électricité',pct(s.power),s.power>.7)}${ind('💼','Chômage',pct(s.unemp),s.unemp<.12)}${ind('😠','Colère',pct(s.unrest),s.unrest<.4)}</div>
@@ -1031,7 +1083,7 @@ function renderPanel(){const B=$('#pbody');
       <div class="kv"><div><small>Population</small><b>${fmtN(G.pop)}</b></div><div><small>Morts (crises)</small><b>${fmtN(totDead())}</b></div><div><small>Économie mondiale</small><b>${pct(G.gdp)}</b></div><div><small>Réchauffement</small><b>+${G.temp.toFixed(2).replace('.',',')} °C</b></div></div>
       <h3>LES PLUS EN COLÈRE</h3>${list(worst((a,b)=>b.unrest-a.unrest),c=>pct(c.unrest))}
       <h3>LES PLUS AFFAMÉS</h3>${list(worst((a,b)=>a.food-b.food),c=>pct(c.food))}
-      ${G.pan?`<h3>LES PLUS TOUCHÉS PAR LE ${G.pan.name.toUpperCase()}</h3>${list(worst((a,b)=>b.I-a.I),c=>pct(c.I,2))}`:''}
+      ${G.pans.length?`<h3>LES PLUS TOUCHÉS PAR LES ÉPIDÉMIES</h3>${list(worst((a,b)=>b.I-a.I),c=>pct(c.I,2))}`:''}
       <h3>MORTS PAR CAUSE</h3>${Object.entries({pandemie:'🦠 Épidémies',faim:'🍞 Faim',soif:'🚱 Soif',guerre:'💣 Guerres',catastrophe:'🌋 Catastrophes'}).map(([k,l])=>`<div class="ws"><span>${l}</span><b>${fmtN(G.dead[k])}</b></div>`).join('')}`;
       B.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>select(+b.dataset.c,true));return;}
     const c=A[sel],P=c.pol;const dead=Object.values(c.dead).reduce((a,b)=>a+b,0);
@@ -1051,27 +1103,47 @@ function renderPanel(){const B=$('#pbody');
     B.querySelectorAll('[data-ci]').forEach(b=>b.onclick=()=>enterCity(sel,+b.dataset.ci));
   }else if(tab==='crises'){
     const o=sel>=0?A[sel].fr:'un pays au hasard';
-    B.innerHTML=`<h2>Déclencher une crise</h2><p class="muted" style="margin:4px 0 12px">Origine : <b style="color:var(--txt)">${o}</b>${sel<0?' — sélectionne un pays sur le globe pour choisir.':''}</p>
+    B.innerHTML=`<h2>Déclencher une crise</h2><p class="muted" style="margin:4px 0 4px">Point de départ : <b style="color:var(--txt)">${o}</b>${sel<0?' — touche un pays sur le globe pour choisir.':''}</p>
+      <h3>ÉPIDÉMIES — ${G.pans.length}/4 EN COURS</h3>
+      <div class="cgrid">${DISEASES.map(d=>{const on=G.pans.some(D=>D.id===d.id);return`<button class="btn ${on?'on':''}" data-d="${d.id}"><div class="i">${d.ic}</div><div class="n">${d.n}</div><div class="d">${d.rand?d.d:`Contagion R0 ${String(d.R0).replace('.',',')} · létalité ${String(+(d.ifr*100).toFixed(1)).replace('.',',')} %`}<br>${d.rand?'':d.d}</div></button>`}).join('')}</div>
+      <h3>AUTRES CRISES</h3>
       <div class="cgrid">${CRISES.map(c=>`<button class="btn" data-k="${c.id}"><div class="i">${c.ic}</div><div class="n">${c.n}</div><div class="d">${c.d}</div></button>`).join('')}</div>
       <h3>MONDE</h3><button class="btn ${G.random?'on':''}" id="rndT"><div class="i">🎲</div><div><div class="n">Événements aléatoires</div><div class="d">Séismes, cyclones, krachs, épidémies surgissent d’eux-mêmes.</div></div><div class="r"><div class="tg"></div></div></button>`;
-    B.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const c=sel>=0?A[sel]:weighted(live().filter(x=>x.pop0>3e6));crisis(b.dataset.k,c);if(speed===0){speed=3;renderSpeeds();}if(sel<0)select(c.i,true);});
+    const origin=()=>sel>=0?A[sel]:weighted(live().filter(x=>x.pop0>3e6));
+    const go=c=>{if(speed===0){speed=3;renderSpeeds();}if(sel<0)select(c.i,true);else renderPanel();};
+    B.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const c=origin();disease(b.dataset.d,c);go(c);});
+    B.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const c=origin();crisis(b.dataset.k,c);go(c);});
     $('#rndT').onclick=()=>{G.random=!G.random;renderPanel();};
   }else if(tab==='pol'){
-    const world=scopeWorld||sel<0;
+    const world=scopeWorld||sel<0,L=live();
+    const val=id=>world?L.reduce((a,c)=>a+c.sl[id]*c.pop,0)/L.reduce((a,c)=>a+c.pop,0):A[sel].sl[id];
+    const fv=(x,v)=>(x.sg&&v>0?'+':'')+Math.round(v)+x.u;
     B.innerHTML=`<h2>Décisions</h2><div class="scope" style="margin-top:10px"><button data-s="0" class="${!world?'on':''}" ${sel<0?'disabled style="opacity:.4"':''}>${sel>=0?A[sel].fr:'Aucun pays'}</button><button data-s="1" class="${world?'on':''}">🌍 Monde entier</button></div>
-      ${POL.map(p=>{let st;if(world){const L=live(),n=L.filter(c=>c.pol[p.id]).length;st=n===0?'':n===L.length?'on':'half';}else st=A[sel].pol[p.id]?'on':'';
+      <h3>CURSEURS</h3>
+      ${SLIDERS.map(x=>{const v=val(x.id);return`<div class="sld"><div class="t"><span>${x.ic} ${x.n}</span><b data-v="${x.id}">${fv(x,v)}</b></div>
+        <input type="range" min="${x.min}" max="${x.max}" step="1" value="${Math.round(v)}" data-r="${x.id}" style="--p:${(v-x.min)/(x.max-x.min)*100}%">
+        <div class="d" data-dd="${x.id}">${x.d(v)}</div></div>`}).join('')}
+      <button class="btn" id="slReset" style="margin-top:4px"><div class="i">↺</div><div><div class="n">Remettre les curseurs à zéro</div></div></button>
+      <h3>MESURES</h3>
+      ${POL.map(p=>{let st;if(world){const n=L.filter(c=>c.pol[p.id]).length;st=n===0?'':n===L.length?'on':'half';}else st=A[sel].pol[p.id]?'on':'';
         return`<button class="btn ${st==='on'?'on':''}" data-p="${p.id}"><div class="i">${p.ic}</div><div><div class="n">${p.n}</div><div class="d">${p.d}</div></div><div class="r"><div class="tg ${st==='half'?'half':''}"></div></div></button>`}).join('')}`;
     B.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{if(sel<0&&b.dataset.s==='0')return;scopeWorld=b.dataset.s==='1';renderPanel();});
+    const targets=()=>world?L:[A[sel]];
+    B.querySelectorAll('[data-r]').forEach(r=>{const x=SLIDERS.find(y=>y.id===r.dataset.r);
+      r.oninput=()=>{const v=+r.value;for(const c of targets())c.sl[x.id]=v;r.style.setProperty('--p',(v-x.min)/(x.max-x.min)*100+'%');
+        B.querySelector(`[data-v="${x.id}"]`).textContent=fv(x,v);B.querySelector(`[data-dd="${x.id}"]`).textContent=x.d(v);dirty=true;};
+      r.onchange=()=>{const v=+r.value;if(v!==x.def){const who=world?'Le monde entier':A[sel].fr;alertE(0,x.ic,`${who} : ${x.n.toLowerCase()} réglé à ${fv(x,v)}`,world?-1:sel,-1,'sl'+x.id+(world?'w':sel),.02);}};});
+    $('#slReset').onclick=()=>{for(const c of targets())c.sl=SLDEF();renderPanel();};
     B.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const id=b.dataset.p,p=POL.find(x=>x.id===id);
-      if(world){const L=live(),on=!L.every(c=>c.pol[id]);for(const c of L)c.pol[id]=on;if(on)alertE(0,p.ic,`Le monde entier adopte : ${p.n}`,-1,-1,null);}
+      if(world){const on=!L.every(c=>c.pol[id]);for(const c of L)c.pol[id]=on;if(on)alertE(0,p.ic,`Le monde entier adopte : ${p.n}`,-1,-1,null);}
       else{const c=A[sel];c.pol[id]=!c.pol[id];if(c.pol[id])alertE(0,p.ic,`${c.fr} : ${p.n.toLowerCase()}`,c.i,-1,null);}
-      if(id==='vaccinate'&&G.vaccine<1)toast('Aucun vaccin disponible : activez la recherche médicale');
+      if(id==='vaccinate'&&!G.pans.some(D=>D.vaccine>=1))toast('Aucun vaccin disponible : active la recherche médicale');
       renderPanel();dirty=true;});
   }else if(tab==='alerts'){B.innerHTML=`<h2>Alertes</h2><p class="muted" style="margin:4px 0 10px">Touche une alerte pour t’y rendre.</p>`;if(!feed.length)B.innerHTML+='<p class="muted">Rien à signaler… pour l’instant.</p>';
     for(const a of feed.slice(0,80))B.appendChild(alertEl(a));}
 }
 const totDead=()=>Object.values(G.dead).reduce((a,b)=>a+b,0);
-function renderWorld(){const chips=[];if(G.pan)chips.push(`<span class="chip">🦠 ${G.pan.name} · vaccin ${G.vaccine>=1?'✅':Math.round(G.research*100)+' %'}</span>`);
+function renderWorld(){const chips=[];for(const D of G.pans)chips.push(`<span class="chip">${D.ic} ${D.n} · vaccin ${D.vaccine>=1?'✅':Math.round(D.research*100)+' %'}</span>`);
   const wars=PAIRS.filter(p=>p.war).length;if(wars)chips.push(`<span class="chip">💥 ${wars} guerre${wars>1?'s':''}</span>`);
   const fam=A.filter(c=>c.food<.5&&c.pop0>1e6).length;if(fam)chips.push(`<span class="chip">🍞 ${fam} famine${fam>1?'s':''}</span>`);
   if(G.fin>.15)chips.push(`<span class="chip">📉 Crise financière</span>`);
@@ -1083,7 +1155,7 @@ function renderWorld(){const chips=[];if(G.pan)chips.push(`<span class="chip">�
   const m=$('#mars');if(G.mars>0&&view==='globe'){m.style.display='flex';$('#marsT').textContent=G.ms>=6?'Système solaire':'Mars';$('#marsP').textContent=fmtN(G.mars)+' colons';}else m.style.display='none';}
 
 /* ====================== SAUVEGARDE ====================== */
-const DYN=['pop','S','I','R','dead','rd','gdp','unemp','infl','market','mkW','fin','food','water','power','unrest','approval','mil','pol','drought','cyber','famine','hist','hadCase'];
+const DYN=['pop','sl','dz','I','dead','rd','gdp','unemp','infl','market','mkW','fin','food','water','power','unrest','approval','mil','pol','drought','cyber','famine','hist','hadCase'];
 function save(){try{const d={G,speed,c:A.map(c=>{const o={};for(const k of DYN)o[k]=c[k];o.cd=c.cities.map(x=>[x.damage,x.last]);return o;}),p:PAIRS.map(p=>[p.t,p.war?1:0,p.days,p.att]),feed:feed.slice(0,40)};localStorage.setItem('gaia.v1',JSON.stringify(d));}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem('gaia.v1'));if(!d||d.c.length!==A.length)return false;G=Object.assign(newG(),d.G);
   A.forEach((c,i)=>{resetDyn(c);Object.assign(c,d.c[i]);c.wk={pandemie:0,faim:0,soif:0,guerre:0,catastrophe:0};(d.c[i].cd||[]).forEach((x,j)=>{if(c.cities[j]){c.cities[j].damage=x[0];c.cities[j].last=x[1];}});});
@@ -1092,6 +1164,7 @@ function loadSave(){try{const d=JSON.parse(localStorage.getItem('gaia.v1'));if(!
 /* ====================== MENU ====================== */
 const SCEN=[
  {id:'sandbox',ic:'🌍',n:'Bac à sable',d:'Le monde tel qu’il est. À toi de jouer.'},
+ {id:'covid',ic:'🦠',n:'Covid-19',d:'Wuhan, hiver 2027 : le virus revient.'},
  {id:'pandemic',ic:'🦠',n:'Pandémie mondiale',d:'Un virus inconnu émerge en Asie.'},
  {id:'krach',ic:'📉',n:'Krach 2.0',d:'Wall Street s’effondre un lundi matin.'},
  {id:'war',ic:'💣',n:'Poudrière',d:'Trois guerres éclatent en même temps.'},
@@ -1111,12 +1184,13 @@ function showMenu(first){const has=!!localStorage.getItem('gaia.v1');
 function startScenario(id){G=newG();feed=[];unread=0;for(const c of A)resetDyn(c);for(const p of PAIRS){p.war=false;p.days=0;p.t=.08+Math.random()*.12;}for(const c of A)for(const ct of c.cities){ct.damage=0;ct.last=-99;}rebuildWars();
   const by=n=>A.find(c=>c.name===n);simulate(0.01);
   const big=()=>weighted(live().filter(c=>c.pop0>2e7));
-  if(id==='pandemic')crisis('pandemic',pick([by('China'),by('India'),by('Vietnam'),by('Indonesia')]));
+  if(id==='pandemic')disease('x',pick([by('China'),by('India'),by('Vietnam'),by('Indonesia')]));
   if(id==='krach')crisis('krach',by('United States of America'));
+  if(id==='covid')disease('covid',by('China'));
   if(id==='war'){for(let i=0;i<3;i++){const p=pick(PAIRS.filter(p=>!p.war&&A[p.a].pop0>5e6&&A[p.b].pop0>5e6));if(p){p.t=.95;startWar(p,Math.random()<.5?p.a:p.b);}}}
   if(id==='thirst'){G.temp=2.3;for(const c of A)if(Math.abs(c.cent[1])<42&&Math.random()<.6)c.drought=rnd(100,300);alertE(2,'🏜️','La planète a soif : sécheresses sur trois continents',-1,-1,null);}
-  if(id==='mars'){for(const n of['United States of America','China','Russia','India','Japan','France','Germany'])by(n).pol.space=true;alertE(3,'🚀','Les grandes puissances lancent la course vers Mars',-1,-1,null);}
-  if(id==='chaos'){crisis('pandemic',big());crisis('krach',by('China'));const p=pick(PAIRS.filter(p=>A[p.a].pop0>5e6&&A[p.b].pop0>5e6));p.t=.95;startWar(p,p.a);crisis('drought',big());crisis('famine',weighted(live().filter(c=>c.gdpc<3)));}
+  if(id==='mars'){for(const n of['United States of America','China','Russia','India','Japan','France','Germany']){by(n).pol.space=true;}alertE(3,'🚀','Les grandes puissances lancent la course vers Mars',-1,-1,null);}
+  if(id==='chaos'){disease('x',big());crisis('krach',by('China'));const p=pick(PAIRS.filter(p=>A[p.a].pop0>5e6&&A[p.b].pop0>5e6));p.t=.95;startWar(p,p.a);crisis('drought',big());crisis('famine',weighted(live().filter(c=>c.gdpc<3)));}
   speed=id==='sandbox'?3:3;$('#modal').style.display='none';afterStart();save();}
 function afterStart(){renderSpeeds();renderLayers();sel=-1;tab='info';setTab();renderPanel();renderCrumbs();renderWorld();updHint();dirty=true;$('#feed').innerHTML='';}
 $('#menuBtn').onclick=()=>showMenu(false);
@@ -1128,8 +1202,9 @@ function loop(now){requestAnimationFrame(loop);
   if($('#modal').style.display!=='none'&&view==='globe'&&!dirty){return;}
   if(SPEEDS[speed].v>0&&$('#modal').style.display==='none'){simulate(SPEEDS[speed].v*dtR);}
   stepFX(dtR);
+  const nkT=SPEEDS[speed].v<=1/24+1e-9?1:0;NK+=(nkT-NK)*Math.min(1,dtR*2.5);
   if(anim){anim.t=Math.min(1,anim.t+dtR/.9);anim.f(anim.t);dirty=true;if(anim.t>=1){anim=null;updHint();}}
-  if(view==='globe'){const busy=dirty||missiles.length||booms.length||PAIRS.some(p=>p.war);const interval=missiles.length||booms.length||anim||drag?16:SPEEDS[speed].v>0?50:33;
+  if(view==='globe'){const busy=dirty||missiles.length||booms.length||PAIRS.some(p=>p.war);if(SPEEDS[speed].v>0||Math.abs(NK-nkT)>.005)dirty=true;const interval=missiles.length||booms.length||anim||drag?16:(NK>.01||Math.abs(NK-nkT)>.005)?33:SPEEDS[speed].v>0?90:33;
     if(busy&&now-lastG>=interval-2){lastG=now;drawGlobe(now);dirty=false;}}
   else if(scene){if(now-lastFrame>=30){const d=(now-lastFrame)/1000;lastFrame=now;csT+=d;if(csT>1){csT=0;CS=cityState();assign();renderCityHud();}stepCity(Math.min(.1,d));drawCity();}}
   uiT+=dtR;if(uiT>.4){uiT=0;renderWorld();if(tab==='info'&&(sel>=0||view==='globe')&&now-panelT>1500){panelT=now;if(!document.querySelector('#pbody:hover'))renderPanel();}if(SPEEDS[speed].v>0)dirty=true;}
